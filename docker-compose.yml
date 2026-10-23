@@ -1,0 +1,55 @@
+services:
+  # 메인 Linux 분석 및 실습 컨테이너
+  linux-lab:
+    build:
+      context: ./examples/basic-app
+      dockerfile: Dockerfile
+    container_name: linux-lab
+    hostname: linux-lab
+    privileged: true # eBPF, cgroups, strace, tc 등 커널 진단 기능을 온전히 실습하기 위해 설정
+    cap_add:
+      - SYS_PTRACE
+      - NET_ADMIN
+      - SYS_ADMIN
+    security_opt:
+      - seccomp:unconfined
+    volumes:
+      - .:/workspace:rw
+      - /sys/fs/cgroup:/sys/fs/cgroup:rw
+    working_dir: /workspace
+    networks:
+      lab-network:
+        ipv4_address: 172.28.0.10
+    stdin_open: true
+    tty: true
+
+  # 장애 주입 및 부하 시뮬레이션용 대상 웹 애플리케이션 (Python Poetry + FastAPI)
+  chaos-target:
+    build:
+      context: ./examples/final-project
+      dockerfile: Dockerfile
+    container_name: chaos-target
+    hostname: chaos-target
+    ports:
+      - "8000:8000"
+    environment:
+      - PORT=8000
+      - LOG_LEVEL=info
+    networks:
+      lab-network:
+        ipv4_address: 172.28.0.20
+    deploy:
+      resources:
+        limits:
+          cpus: '1.0'
+          memory: 512M
+    restart: unless-stopped
+
+networks:
+  lab-network:
+    name: lab-network
+    driver: bridge
+    ipam:
+      driver: default
+      config:
+        - subnet: 172.28.0.0/16

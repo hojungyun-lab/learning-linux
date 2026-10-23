@@ -1,0 +1,21 @@
+[tool.poetry]
+name = "system-chaos-lab"
+version = "0.1.0"
+description = "Linux 시스템 실습용 리소스 부하 시뮬레이션 및 장애 재현 웹 애플리케이션"
+authors = ["Systems Instructor <systems@example.com>"]
+readme = "README.md"
+packages = [{include = "app"}]
+
+[tool.poetry.dependencies]
+python = "^3.11"
+fastapi = "^0.115.0"
+uvicorn = {extras = ["standard"], version = "^0.30.0"}
+psutil = "^6.0.0"
+
+[tool.poetry.group.dev.dependencies]
+pytest = "^8.3.0"
+httpx = "^0.27.0"
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
